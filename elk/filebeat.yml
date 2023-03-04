@@ -1,0 +1,16 @@
+filebeat.inputs:
+- type: log
+  id: my-filestream-id
+  enabled: true
+  paths:
+      - /var/www/html/notify.log
+      - /var/www/html_copy/notify.log
+  json:
+    add_error_key: true
+  fields:
+    project: api_server    
+
+output.elasticsearch:
+  hosts: ["es:9200"]
+setup.kibana:
+  host: "kibana:5601"

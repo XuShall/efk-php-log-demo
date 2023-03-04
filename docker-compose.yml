@@ -1,0 +1,56 @@
+version: '3'
+
+services:
+  es:
+    build: 
+      context: ./elk
+      dockerfile: e.dockerfile
+    ports:
+      - "9200:9200"  
+      - "9300:9300"  
+    networks:
+      - app-tier
+  kibana:
+    build:
+      context: ./elk
+      dockerfile: k.dockerfile  
+    ports:
+      - "5601:5601"  
+    networks:
+      - app-tier
+    depends_on:
+      - es
+  filebeat:
+    build:
+      context: ./elk    
+      dockerfile: f.dockerfile
+    volumes:
+      - ./src:/var/www/html:delegated
+      - ./srccopy:/var/www/html_copy:delegated
+    networks:
+      - app-tier
+  php:
+    build:
+      context: ./demo
+      dockerfile: php.Dockerfile
+    volumes:
+      - ./src:/var/www/html:delegated
+      - ./srccopy:/var/www/html_copy:delegated
+    networks:
+      - app-tier
+  app:
+    build:
+      context: ./demo
+      dockerfile: nginx.Dockerfile
+    ports:
+      - "4000:80"
+    volumes:
+      - ./src:/var/www/html:delegated
+      - ./srccopy:/var/www/html_copy:delegated
+    depends_on:
+      - php
+    networks:
+      - app-tier
+networks:
+  app-tier:
+    driver: bridge
